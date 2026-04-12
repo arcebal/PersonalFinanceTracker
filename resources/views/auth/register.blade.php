@@ -1,4 +1,8 @@
-<x-guest-layout>
+@extends('layouts.auth')
+
+@section('title','Register')
+
+@section('content')
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
@@ -49,4 +53,4 @@
             </x-primary-button>
         </div>
     </form>
-</x-guest-layout>
+@endsection
