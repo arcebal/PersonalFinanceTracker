@@ -2,71 +2,147 @@
 @section('title', 'Transactions')
 @section('content')
 
-<div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">💸 Transactions</h2>
-    <a href="{{ route('transactions.create') }}"
-       class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">
-        + Add Transaction
-    </a>
-</div>
+<div class="page-shell">
+    <section class="page-header">
+        <div class="page-title-block">
+            <span class="page-kicker">Transactions</span>
+            <h1 class="page-title">Cash flow log</h1>
+            <p class="page-subtitle">Review income and expense activity, then narrow the table with account, category, and date filters.</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('transactions.export') }}" class="btn-secondary">Export CSV</a>
+            <a href="{{ route('transactions.trashed') }}" class="btn-secondary">View trash</a>
+            <a href="{{ route('transactions.create') }}" class="btn-primary">Add transaction</a>
+        </div>
+    </section>
 
-<div class="bg-white rounded-2xl shadow overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
-                <tr>
-                    <th class="px-6 py-3 text-left">Date</th>
-                    <th class="px-6 py-3 text-left">Description</th>
-                    <th class="px-6 py-3 text-left">Category</th>
-                    <th class="px-6 py-3 text-left">Account</th>
-                    <th class="px-6 py-3 text-left">Type</th>
-                    <th class="px-6 py-3 text-left">Amount</th>
-                    <th class="px-6 py-3 text-left">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse($transactions as $t)
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-gray-600">{{ $t->transaction_date }}</td>
-                    <td class="px-6 py-4 text-gray-800">{{ $t->description ?? '—' }}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded-full text-white text-xs font-semibold"
-                              style="background-color: {{ $t->category->color }}">
-                            {{ $t->category->name }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-gray-600">{{ $t->account->name }}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold
-                            {{ $t->type === 'income' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">
-                            {{ ucfirst($t->type) }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 font-bold {{ $t->type === 'income' ? 'text-emerald-600' : 'text-red-500' }}">
-                        {{ $t->type === 'income' ? '+' : '-' }}₱{{ number_format($t->amount, 2) }}
-                    </td>
-                    <td class="px-6 py-4 flex gap-2">
-                        <a href="{{ route('transactions.edit', $t) }}"
-                           class="bg-yellow-400 hover:bg-yellow-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">
-                            Edit
-                        </a>
-                        <form action="{{ route('transactions.destroy', $t) }}" method="POST">
-                            @csrf @method('DELETE')
-                            <button onclick="return confirm('Delete this transaction?')"
-                                    class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">
-                                Delete
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="7" class="px-6 py-8 text-center text-gray-400">No transactions yet.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <section class="section-card">
+        <div class="panel-heading mb-6">
+            <div class="panel-title-block">
+                <span class="page-kicker">Filters</span>
+                <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Refine the transaction list</h2>
+                <p class="panel-subtitle">Search by text, date, account, category, or type.</p>
+            </div>
+        </div>
+
+        <form method="GET" action="{{ route('transactions.index') }}" class="auth-form">
+            <div class="form-grid">
+                <div class="form-field md:col-span-3">
+                    <label class="field-label">Start date</label>
+                    <input type="date" name="start_date" value="{{ $filters['start_date'] ?? '' }}">
+                </div>
+
+                <div class="form-field md:col-span-3">
+                    <label class="field-label">End date</label>
+                    <input type="date" name="end_date" value="{{ $filters['end_date'] ?? '' }}">
+                </div>
+
+                <div class="form-field md:col-span-3">
+                    <label class="field-label">Category</label>
+                    <select name="category_id">
+                        <option value="">All</option>
+                        @foreach($categories as $c)
+                            <option value="{{ $c->id }}" {{ isset($filters['category_id']) && $filters['category_id'] == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-field md:col-span-3">
+                    <label class="field-label">Account</label>
+                    <select name="account_id">
+                        <option value="">All</option>
+                        @foreach($accounts as $a)
+                            <option value="{{ $a->id }}" {{ isset($filters['account_id']) && $filters['account_id'] == $a->id ? 'selected' : '' }}>{{ $a->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-field md:col-span-3">
+                    <label class="field-label">Type</label>
+                    <select name="type">
+                        <option value="">All</option>
+                        <option value="income" {{ isset($filters['type']) && $filters['type'] == 'income' ? 'selected' : '' }}>Income</option>
+                        <option value="expense" {{ isset($filters['type']) && $filters['type'] == 'expense' ? 'selected' : '' }}>Expense</option>
+                    </select>
+                </div>
+
+                <div class="form-field md:col-span-6">
+                    <label class="field-label">Search</label>
+                    <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Description or amount">
+                </div>
+
+                <div class="form-field md:col-span-3">
+                    <label class="field-label">Apply filters</label>
+                    <button class="btn-primary">Filter transactions</button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section class="table-shell">
+        @if ($transactions->count())
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Account</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($transactions as $t)
+                            <tr>
+                                <td>{{ \Illuminate\Support\Carbon::parse($t->transaction_date)->format('M d, Y') }}</td>
+                                <td>
+                                    <div class="table-title">{{ $t->description ?: 'Recorded transaction' }}</div>
+                                    <div class="text-sm text-muted">Saved to {{ $t->account->name }}</div>
+                                </td>
+                                <td>
+                                    <span class="table-badge" style="border-color: {{ $t->category->color }}33; background-color: {{ $t->category->color }}1f; color: {{ $t->category->color }};">
+                                        {{ $t->category->name }}
+                                    </span>
+                                </td>
+                                <td>{{ $t->account->name }}</td>
+                                <td>
+                                    <span class="{{ $t->type === 'income' ? 'badge-income' : 'badge-expense' }}">
+                                        {{ ucfirst($t->type) }}
+                                    </span>
+                                </td>
+                                <td class="{{ $t->type === 'income' ? 'text-income' : 'text-expense' }} font-bold">
+                                    {{ $t->type === 'income' ? '+' : '-' }}₱{{ number_format($t->amount, 2) }}
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a href="{{ route('transactions.edit', $t) }}" class="btn-secondary">Edit</a>
+                                        <form action="{{ route('transactions.destroy', $t) }}" method="POST" class="swal-delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="delete-btn btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14M5 12h14M9 17h10" />
+                    </svg>
+                </div>
+                <p>No transactions matched the current filters.</p>
+                <a href="{{ route('transactions.create') }}" class="btn-primary">Add transaction</a>
+            </div>
+        @endif
+    </section>
 </div>
 
 @endsection

@@ -9,7 +9,55 @@ class AccountController extends Controller
     public function index()
     {
         $accounts = Account::where('user_id', auth()->id())->latest()->get();
-        return view('accounts.index', compact('accounts'));
+        $categories = \App\Models\Category::where('user_id', auth()->id())->get();
+        return view('accounts.index', compact('accounts', 'categories'));
+    }
+
+    public function trashed()
+    {
+        $accounts = Account::onlyTrashed()->where('user_id', auth()->id())->get();
+        return view('accounts.trashed', compact('accounts'));
+    }
+
+    public function restore($id)
+    {
+        $a = Account::withTrashed()->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $a->restore();
+        return redirect()->back()->with('success', 'Account restored.');
+    }
+
+    public function forceDelete($id)
+    {
+        $a = Account::withTrashed()->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $a->forceDelete();
+        return redirect()->back()->with('success', 'Account permanently deleted.');
+    }
+
+    public function exportCsv()
+    {
+        $accounts = Account::where('user_id', auth()->id())->latest()->get();
+
+        $filename = 'accounts_export_'.date('Ymd_His').'.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename={$filename}",
+        ];
+
+        $callback = function() use ($accounts) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Name','Type','Balance','Description']);
+            foreach ($accounts as $a) {
+                fputcsv($handle, [
+                    $a->name,
+                    $a->type,
+                    $a->balance,
+                    $a->description,
+                ]);
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     public function create()
@@ -37,6 +85,13 @@ class AccountController extends Controller
         return redirect()->route('accounts.index')->with('success', 'Account created successfully!');
     }
 
+    public function show(Account $account)
+    {
+        abort_if($account->user_id !== auth()->id(), 403);
+        // redirect to edit page for simplicity
+        return redirect()->route('accounts.edit', $account);
+    }
+
     public function edit(Account $account)
     {
         abort_if($account->user_id !== auth()->id(), 403);
@@ -60,6 +115,8 @@ class AccountController extends Controller
     {
         abort_if($account->user_id !== auth()->id(), 403);
         $account->delete();
-        return redirect()->route('accounts.index')->with('success', 'Account deleted successfully!');
+        return redirect()->route('accounts.index')
+            ->with('success', 'Account deleted successfully!')
+            ->with('undo', route('accounts.restore', $account->id));
     }
 }

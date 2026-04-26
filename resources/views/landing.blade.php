@@ -1,231 +1,209 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', 'PersonalFinance') }} - Welcome</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        @keyframes float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)} }
-        @keyframes fadeInUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes slideInRight { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
-        .animate-float{animation:float 3s ease-in-out infinite}
-        .animate-fade-in-up{animation:fadeInUp .7s ease-out forwards}
-        .animate-slide-in-right{animation:slideInRight .7s ease-out forwards}
-        .gradient-bg{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}
-        .gradient-text{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ config('app.name', 'TrackerYarn') }} - Personal Finance Tracker</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-50">
+<body>
+    <div class="landing-shell" x-data="{ mobileMenuOpen: false }">
+        <nav class="landing-nav">
+            <a href="/" class="brand-lockup">
+                <span class="brand-mark">
+                    <x-application-logo class="h-7 w-7" />
+                </span>
+                <span class="brand-copy">
+                    <strong>TrackerYarn</strong>
+                    <span>Minimal finance command center</span>
+                </span>
+            </a>
 
-<nav class="fixed w-full bg-white/90 backdrop-blur-md shadow-sm z-50" x-data="{ mobileMenuOpen: false }">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 flex items-center">
-                    <!-- question-mark icon -->
-                    <svg class="h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 14a1 1 0 110 2 1 1 0 010-2zm1.07-7.75c.2.23.33.52.33.83 0 .7-.56 1.07-1.42 1.6-.8.49-1.24.86-1.24 1.82v.5a1 1 0 11-2 0v-.5c0-1.32.7-2.06 1.6-2.6.83-.51 1.46-.9 1.46-1.82 0-.6-.34-1.2-.94-1.56A2 2 0 1010 6a1 1 0 112 0c0 .26.19.51.43.75z" clip-rule="evenodd"/></svg>
-                    <span class="ml-2 text-xl font-bold gradient-text">TrackerYarn</span>
-                </div>
-            </div>
-
-            <div class="hidden md:flex items-center space-x-6">
-                <a href="#features" class="text-gray-700 hover:text-indigo-600">Features</a>
-                @if(Route::has('login'))
-                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-indigo-600">Login</a>
+            <div class="hidden items-center gap-3 md:flex">
+                <a href="#features" class="ghost-link">Features</a>
+                @if (Route::has('login'))
+                    <a href="{{ route('login') }}" class="btn-secondary">Login</a>
                 @endif
-                @if(Route::has('register'))
-                    <a href="{{ route('register') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">Get Started</a>
+                @if (Route::has('register'))
+                    <a href="{{ route('register') }}" class="btn-primary">Get Started</a>
                 @endif
             </div>
 
-            <div class="md:hidden">
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="text-gray-700">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                </button>
+            <button type="button" class="icon-button md:hidden" @click="mobileMenuOpen = !mobileMenuOpen" aria-label="Toggle menu">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M4 12h16M4 17h16" />
+                </svg>
+            </button>
+        </nav>
+
+        <div
+            x-cloak
+            x-show="mobileMenuOpen"
+            x-transition
+            class="mb-4 rounded-[24px] border border-[var(--border)] bg-[var(--bg-panel)] p-4 shadow-xl backdrop-blur-2xl md:hidden"
+        >
+            <div class="grid gap-3">
+                <a href="#features" class="btn-secondary justify-start">Features</a>
+                @if (Route::has('login'))
+                    <a href="{{ route('login') }}" class="btn-secondary justify-start">Login</a>
+                @endif
+                @if (Route::has('register'))
+                    <a href="{{ route('register') }}" class="btn-primary justify-start">Get Started</a>
+                @endif
             </div>
         </div>
-    </div>
 
-    <div x-show="mobileMenuOpen" x-transition class="md:hidden bg-white border-t">
-        <div class="px-4 py-3 space-y-3">
-            <a href="#features" class="block text-gray-700">Features</a>
-            @if(Route::has('login'))<a href="{{ route('login') }}" class="block text-gray-700">Login</a>@endif
-            @if(Route::has('register'))<a href="{{ route('register') }}" class="block inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">Get Started</a>@endif
-        </div>
-    </div>
-</nav>
+        <section class="landing-hero-grid">
+            <div class="landing-copy flex flex-col justify-between">
+                <div class="max-w-2xl">
+                    <span class="auth-copy-badge">Modern Finance Workspace</span>
+                    <h1 class="auth-copy-title mt-5">Track every peso with a cleaner, calmer dashboard.</h1>
+                    <p class="auth-copy-text mt-6 max-w-xl">
+                        Manage balances, transactions, categories, and budgets inside a glassmorphism interface inspired by modern fintech products, without the clutter.
+                    </p>
 
-<!-- Hero: copied top/animation/heading -->
-<section class="pt-24 pb-20 px-4 sm:px-6 lg:px-8 gradient-bg overflow-hidden">
-    <div class="max-w-7xl mx-auto">
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
-            <div class="text-white space-y-8">
-                <div class="animate-fade-in-up" style="animation-delay: 0.1s; opacity: 0;">
-                    <span class="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-4">
-                        ⚡ Powered by Tyron Daton
-                    </span>
-                    <h1 class="text-5xl sm:text-6xl font-bold leading-tight">
-                        Take Control of Your
-                        <span class="block mt-2">Finances Today</span>
-                    </h1>
+                    <div class="mt-8 flex flex-wrap gap-3">
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="btn-primary">Create your workspace</a>
+                        @endif
+                        @if (Route::has('login'))
+                            <a href="{{ route('login') }}" class="btn-secondary">Sign in</a>
+                        @endif
+                    </div>
                 </div>
 
-                <p class="text-xl text-purple-100 animate-fade-in-up" style="animation-delay: 0.3s; opacity: 0;">
-                    Track expenses, manage budgets, and achieve your financial goals with a beautiful and powerful expense tracker.
-                </p>
-
-                <div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style="animation-delay: 0.5s; opacity: 0;">
-                    @if(Route::has('register'))
-                        <a href="{{ route('register') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 text-center">
-                            Start Free Trial
-                        </a>
-                    @endif
-                </div>
-
-                <div class="flex items-center gap-8 pt-4 animate-fade-in-up" style="animation-delay: 0.7s; opacity: 0;">
-                    <div>
-                        <div class="text-3xl font-bold">10K+</div>
-                        <div class="text-purple-200 text-sm">Active Users</div>
+                <div class="landing-stat-grid mt-10">
+                    <div class="landing-stat">
+                        <strong>1 view</strong>
+                        <span>for balances, cash flow, and budgets</span>
                     </div>
-                    <div class="h-12 w-px bg-purple-300"></div>
-                    <div>
-                        <div class="text-3xl font-bold">$2M+</div>
-                        <div class="text-purple-200 text-sm">Tracked</div>
+                    <div class="landing-stat">
+                        <strong>Fast</strong>
+                        <span>entry for daily transaction logging</span>
                     </div>
-                    <div class="h-12 w-px bg-purple-300"></div>
-                    <div>
-                        <div class="text-3xl font-bold">4.9★</div>
-                        <div class="text-purple-200 text-sm">Rating</div>
+                    <div class="landing-stat">
+                        <strong>Clear</strong>
+                        <span>category-level spending visibility</span>
                     </div>
                 </div>
             </div>
 
-            <div class="relative animate-slide-in-right" style="animation-delay: 0.4s; opacity: 0;">
-                <div class="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-2xl transform rotate-3"></div>
-                <div class="relative bg-white rounded-2xl shadow-2xl p-6 animate-float">
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-800">This Month</h3>
-                            <span class="text-sm text-gray-500">{{ now()->format('F Y') }}</span>
+            <div class="section-card landing-preview flex flex-col justify-between">
+                <div class="panel-heading">
+                    <div class="panel-title-block">
+                        <span class="page-kicker">Preview</span>
+                        <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Monthly command center</h2>
+                        <p class="panel-subtitle">A simplified overview of balance, incoming cash, and spending pressure.</p>
+                    </div>
+                    <span class="app-badge">{{ now()->format('F Y') }}</span>
+                </div>
+
+                <div class="metric-grid mt-6">
+                    <div class="metric-card col-span-12 md:col-span-6">
+                        <div class="metric-icon">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.5h18v9A2.5 2.5 0 0118.5 20h-13A2.5 2.5 0 013 17.5v-9zm0 3h18M7 5h10" />
+                            </svg>
                         </div>
+                        <div class="metric-label">Total balance</div>
+                        <div class="metric-value">₱184,250</div>
+                        <div class="metric-trend">Across wallet, cash, and bank accounts</div>
+                    </div>
 
-                        <div class="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl p-6 text-white">
-                            <div class="text-sm opacity-90 mb-2">Total Spent</div>
-                            <div class="text-4xl font-bold">$3,247.85</div>
-                            <div class="text-sm mt-2 flex items-center">
-                                <span class="text-green-300">↓ 12% from last month</span>
-                            </div>
+                    <div class="metric-card col-span-12 md:col-span-6">
+                        <div class="metric-icon">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16M7 16V9m5 7V5m5 11v-4" />
+                            </svg>
                         </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-red-50 rounded-lg p-4">
-                                <div class="text-xs text-gray-600 mb-1">Food</div>
-                                <div class="text-xl font-bold text-gray-800">$847</div>
-                            </div>
-                            <div class="bg-blue-50 rounded-lg p-4">
-                                <div class="text-xs text-gray-600 mb-1">Transport</div>
-                                <div class="text-xl font-bold text-gray-800">$234</div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">🍕 Pizza Night</span>
-                                <span class="font-semibold text-gray-800">-$45.00</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">⛽ Gas Station</span>
-                                <span class="font-semibold text-gray-800">-$60.00</span>
-                            </div>
-                            <div class="flex items-center justify-between text-sm">
-                                <span class="text-gray-600">☕ Coffee Shop</span>
-                                <span class="font-semibold text-gray-800">-$12.50</span>
-                            </div>
-                        </div>
+                        <div class="metric-label">Budget use</div>
+                        <div class="metric-value">71%</div>
+                        <div class="metric-trend">Most categories are still within target</div>
                     </div>
                 </div>
+
+                <div class="table-shell mt-6">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Recent activity</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="table-title">Freelance payout</div>
+                                    <div class="text-sm text-muted">Main Wallet</div>
+                                </td>
+                                <td><span class="badge-income">Income</span></td>
+                                <td class="text-income font-bold">+ ₱26,400</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="table-title">Groceries</div>
+                                    <div class="text-sm text-muted">Weekend run</div>
+                                </td>
+                                <td><span class="badge-expense">Expense</span></td>
+                                <td class="text-expense font-bold">- ₱3,240</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="table-title">Utilities</div>
+                                    <div class="text-sm text-muted">Monthly bill</div>
+                                </td>
+                                <td><span class="badge-expense">Expense</span></td>
+                                <td class="text-expense font-bold">- ₱2,180</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <section id="features" class="section-card">
+            <div class="page-header">
+                <div class="page-title-block">
+                    <span class="page-kicker">Product</span>
+                    <h2 class="page-title">Built for everyday finance tracking</h2>
+                    <p class="page-subtitle">Every core workflow is streamlined around faster logging, better visibility, and cleaner organization.</p>
+                </div>
+            </div>
+
+            <div class="feature-grid mt-8">
+                <article class="feature-card">
+                    <div class="feature-icon text-brand">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.5h18v9A2.5 2.5 0 0118.5 20h-13A2.5 2.5 0 013 17.5v-9zm0 3h18M7 5h10" />
+                        </svg>
+                    </div>
+                    <h3>Account management</h3>
+                    <p>Create multiple money buckets and keep balances organized without bouncing between pages.</p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="feature-icon text-brand">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14M5 12h14M9 17h10" />
+                        </svg>
+                    </div>
+                    <h3>Transaction logging</h3>
+                    <p>Add income and expenses quickly with category-aware forms and cleaner table views.</p>
+                </article>
+
+                <article class="feature-card">
+                    <div class="feature-icon text-brand">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16M7 16V9m5 7V5m5 11v-4" />
+                        </svg>
+                    </div>
+                    <h3>Budget oversight</h3>
+                    <p>Set monthly category targets and compare planned amounts versus actual spend with less friction.</p>
+                </article>
+            </div>
+        </section>
     </div>
-</section>
-
-<!-- Features section -->
-<section id="features" class="py-20 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Features</h2>
-        <p class="text-center text-gray-600 mb-12">Everything needed to track expenses, manage budgets and gain insights.</p>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="p-6 bg-white rounded-2xl shadow-lg transform transition hover:-translate-y-2 animate-float">
-                <div class="flex items-center space-x-4 mb-4">
-                    <div class="p-3 rounded-full bg-indigo-50 text-indigo-600">
-                        <!-- wallet icon -->
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2"/></svg>
-                    </div>
-                    <h3 class="text-lg font-semibold">Expense Tracking</h3>
-                </div>
-                <p class="text-gray-600">Quickly add and categorize expenses to see where your money goes.</p>
-            </div>
-
-            <div class="p-6 bg-white rounded-2xl shadow-lg transform transition hover:-translate-y-2 animate-float" style="animation-delay:0.1s">
-                <div class="flex items-center space-x-4 mb-4">
-                    <div class="p-3 rounded-full bg-indigo-50 text-indigo-600">
-                        <!-- bank icon -->
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M5 10v8a2 2 0 002 2h10a2 2 0 002-2v-8M12 10V3"/></svg>
-                    </div>
-                    <h3 class="text-lg font-semibold">Accounts</h3>
-                </div>
-                <p class="text-gray-600">Connect multiple accounts and manage balances in one place.</p>
-            </div>
-
-            <div class="p-6 bg-white rounded-2xl shadow-lg transform transition hover:-translate-y-2 animate-float" style="animation-delay:0.2s">
-                <div class="flex items-center space-x-4 mb-4">
-                    <div class="p-3 rounded-full bg-indigo-50 text-indigo-600">
-                        <!-- chart icon -->
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3v18M20 7l-8 8-4-4-6 6"/></svg>
-                    </div>
-                    <h3 class="text-lg font-semibold">Reports & Insights</h3>
-                </div>
-                <p class="text-gray-600">Visualize spending patterns and export reports for deeper analysis.</p>
-            </div>
-
-            <div class="p-6 bg-white rounded-2xl shadow-lg transform transition hover:-translate-y-2 animate-float" style="animation-delay:0.3s">
-                <div class="flex items-center space-x-4 mb-4">
-                    <div class="p-3 rounded-full bg-indigo-50 text-indigo-600">
-                        <!-- tag icon -->
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7l10 10M7 17V7h10v10H7z"/></svg>
-                    </div>
-                    <h3 class="text-lg font-semibold">Categories</h3>
-                </div>
-                <p class="text-gray-600">Organize expenses with custom categories and rules.</p>
-            </div>
-
-            <div class="p-6 bg-white rounded-2xl shadow-lg transform transition hover:-translate-y-2 animate-float" style="animation-delay:0.4s">
-                <div class="flex items-center space-x-4 mb-4">
-                    <div class="p-3 rounded-full bg-indigo-50 text-indigo-600">
-                        <!-- shield icon -->
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l8 4v6c0 5-3.6 9.74-8 10-4.4-.26-8-5-8-10V6l8-4z"/></svg>
-                    </div>
-                    <h3 class="text-lg font-semibold">Secure</h3>
-                </div>
-                <p class="text-gray-600">Data encrypted and protected with secure authentication and best practices.</p>
-            </div>
-
-            <div class="p-6 bg-white rounded-2xl shadow-lg transform transition hover:-translate-y-2 animate-float" style="animation-delay:0.5s">
-                <div class="flex items-center space-x-4 mb-4">
-                    <div class="p-3 rounded-full bg-indigo-50 text-indigo-600">
-                        <!-- lightning icon -->
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                    <h3 class="text-lg font-semibold">Quick Setup</h3>
-                </div>
-                <p class="text-gray-600">Get started fast with simple onboarding and intuitive UI.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
 </body>
 </html>

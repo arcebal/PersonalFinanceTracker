@@ -12,6 +12,52 @@ class CategoryController extends Controller
         return view('categories.index', compact('categories'));
     }
 
+    public function trashed()
+    {
+        $categories = Category::onlyTrashed()->where('user_id', auth()->id())->get();
+        return view('categories.trashed', compact('categories'));
+    }
+
+    public function restore($id)
+    {
+        $c = Category::withTrashed()->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $c->restore();
+        return redirect()->back()->with('success', 'Category restored.');
+    }
+
+    public function forceDelete($id)
+    {
+        $c = Category::withTrashed()->where('id', $id)->where('user_id', auth()->id())->firstOrFail();
+        $c->forceDelete();
+        return redirect()->back()->with('success', 'Category permanently deleted.');
+    }
+
+    public function exportCsv()
+    {
+        $categories = Category::where('user_id', auth()->id())->latest()->get();
+
+        $filename = 'categories_export_'.date('Ymd_His').'.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename={$filename}",
+        ];
+
+        $callback = function() use ($categories) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Name','Type','Color']);
+            foreach ($categories as $c) {
+                fputcsv($handle, [
+                    $c->name,
+                    $c->type,
+                    $c->color,
+                ]);
+            }
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function create()
     {
         return view('categories.create');
@@ -33,6 +79,12 @@ class CategoryController extends Controller
         ]);
 
         return redirect()->route('categories.index')->with('success', 'Category created successfully!');
+    }
+
+    public function show(Category $category)
+    {
+        abort_if($category->user_id !== auth()->id(), 403);
+        return redirect()->route('categories.edit', $category);
     }
 
     public function edit(Category $category)
@@ -57,6 +109,8 @@ class CategoryController extends Controller
     {
         abort_if($category->user_id !== auth()->id(), 403);
         $category->delete();
-        return redirect()->route('categories.index')->with('success', 'Category deleted successfully!');
+        return redirect()->route('categories.index')
+            ->with('success', 'Category deleted successfully!')
+            ->with('undo', route('categories.restore', $category->id));
     }
 }

@@ -2,62 +2,76 @@
 @section('title', 'Categories')
 @section('content')
 
-<div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">🗂️ Categories</h2>
-    <a href="{{ route('categories.create') }}"
-       class="bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">
-        + Add Category
-    </a>
-</div>
+<div class="page-shell">
+    <section class="page-header">
+        <div class="page-title-block">
+            <span class="page-kicker">Categories</span>
+            <h1 class="page-title">Classification rules</h1>
+            <p class="page-subtitle">Use categories to keep reports readable and budgets accurate across income and expense entries.</p>
+        </div>
+        <div class="page-actions">
+            <a href="{{ route('categories.trashed') }}" class="btn-secondary">View trash</a>
+            <a href="{{ route('categories.create') }}" class="btn-primary">Add category</a>
+        </div>
+    </section>
 
-<div class="bg-white rounded-2xl shadow overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
-            <tr>
-                <th class="px-6 py-3 text-left">Name</th>
-                <th class="px-6 py-3 text-left">Type</th>
-                <th class="px-6 py-3 text-left">Color</th>
-                <th class="px-6 py-3 text-left">Actions</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            @forelse($categories as $cat)
-            <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4 font-medium text-gray-800">{{ $cat->name }}</td>
-                <td class="px-6 py-4">
-                    <span class="px-2 py-1 rounded-full text-xs font-semibold
-                        {{ $cat->type === 'income' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' }}">
-                        {{ ucfirst($cat->type) }}
-                    </span>
-                </td>
-                <td class="px-6 py-4">
-                    <span class="inline-flex items-center gap-2">
-                        <span class="w-4 h-4 rounded-full inline-block border"
-                              style="background-color: {{ $cat->color }}"></span>
-                        <span class="text-gray-500 text-xs">{{ $cat->color }}</span>
-                    </span>
-                </td>
-                <td class="px-6 py-4 flex gap-2">
-                    <a href="{{ route('categories.edit', $cat) }}"
-                       class="bg-yellow-400 hover:bg-yellow-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">
-                        Edit
-                    </a>
-                    <form action="{{ route('categories.destroy', $cat) }}" method="POST">
-                        @csrf @method('DELETE')
-                        <button onclick="return confirm('Delete this category?')"
-                                class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">
-                            Delete
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="4" class="px-6 py-8 text-center text-gray-400">No categories yet.</td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+    <section class="table-shell">
+        @if ($categories->count())
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Color</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($categories as $cat)
+                            <tr>
+                                <td>
+                                    <div class="table-title">{{ $cat->name }}</div>
+                                    <div class="text-sm text-muted">Used to group related transactions.</div>
+                                </td>
+                                <td>
+                                    <span class="{{ $cat->type === 'income' ? 'badge-income' : 'badge-expense' }}">
+                                        {{ ucfirst($cat->type) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="table-badge" style="border-color: {{ $cat->color }}33; background-color: {{ $cat->color }}1f; color: {{ $cat->color }};">
+                                        <span class="inline-block h-3 w-3 rounded-full" style="background-color: {{ $cat->color }}"></span>
+                                        {{ $cat->color }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a href="{{ route('categories.edit', $cat) }}" class="btn-secondary">Edit</a>
+                                        <form action="{{ route('categories.destroy', $cat) }}" method="POST" class="swal-delete-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="delete-btn btn-danger">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h4l2 2h4v8H7V7zm-2 0h2v10a2 2 0 002 2h8" />
+                    </svg>
+                </div>
+                <p>No categories yet. Add income and expense categories to organize transactions and budgets.</p>
+                <a href="{{ route('categories.create') }}" class="btn-primary">Create category</a>
+            </div>
+        @endif
+    </section>
 </div>
 
 @endsection
