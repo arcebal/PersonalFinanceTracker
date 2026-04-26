@@ -2,18 +2,42 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\RecurringTransactionController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return auth()->check() ? redirect()->route('dashboard') : view('landing');
+    if (! auth()->check()) {
+        return view('landing');
+    }
+
+    return auth()->user()->hasCompletedOnboarding()
+        ? redirect()->route('dashboard')
+        : redirect()->route('onboarding.start');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->prefix('onboarding')->name('onboarding.')->group(function () {
+    Route::get('/', [OnboardingController::class, 'start'])->name('start');
+    Route::get('/account', [OnboardingController::class, 'showAccount'])->name('account.show');
+    Route::post('/account', [OnboardingController::class, 'storeAccount'])->name('account.store');
+    Route::get('/categories', [OnboardingController::class, 'showCategories'])->name('categories.show');
+    Route::post('/categories', [OnboardingController::class, 'storeCategories'])->name('categories.store');
+    Route::get('/budget', [OnboardingController::class, 'showBudget'])->name('budget.show');
+    Route::post('/budget', [OnboardingController::class, 'storeBudget'])->name('budget.store');
+    Route::post('/budget/skip', [OnboardingController::class, 'skipBudget'])->name('budget.skip');
+    Route::get('/transaction', [OnboardingController::class, 'showTransaction'])->name('transaction.show');
+    Route::post('/transaction', [OnboardingController::class, 'storeTransaction'])->name('transaction.store');
+    Route::post('/transaction/skip', [OnboardingController::class, 'skipTransaction'])->name('transaction.skip');
+});
+
+Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Additional product routes: trashed, restore, force delete, export CSV
@@ -31,13 +55,19 @@ Route::middleware(['auth'])->group(function () {
     Route::post('categories/{id}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
     Route::delete('categories/{id}/force', [CategoryController::class, 'forceDelete'])->name('categories.forceDelete');
     Route::get('categories/export/csv', [CategoryController::class, 'exportCsv'])->name('categories.export');
-    Route::post('reports/export-pdf', [\App\Http\Controllers\ReportController::class, 'exportPdf'])->name('reports.exportPdf');
+    Route::post('reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
+    Route::post('recurring-transactions/{recurringTransaction}/confirm', [RecurringTransactionController::class, 'confirm'])->name('recurring-transactions.confirm');
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::patch('notifications/{appNotification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
 
     // Resource routes (placed after specific routes to avoid conflicts)
     Route::resource('categories', CategoryController::class);
     Route::resource('accounts', AccountController::class);
     Route::resource('transactions', TransactionController::class);
     Route::resource('budgets', BudgetController::class);
+    Route::resource('recurring-transactions', RecurringTransactionController::class)
+        ->parameters(['recurring-transactions' => 'recurringTransaction']);
 
     // Profile routes (edit, update, destroy)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

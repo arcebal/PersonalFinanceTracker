@@ -1,4 +1,4 @@
-<nav class="bg-white dark:bg-[#071126] text-white px-6 py-4 shadow-md">
+<nav class="border-b border-[var(--border)] bg-[var(--bg-panel-strong)] px-6 py-4 text-[var(--text-primary)] shadow-[var(--shadow-sm)] backdrop-blur-2xl">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3 text-xl font-bold text-grok">
             <x-application-logo class="h-9 w-9 shrink-0" />
@@ -7,19 +7,19 @@
 
         <div class="flex items-center gap-6 text-sm font-medium">
             <a href="{{ route('dashboard') }}"
-               class="{{ request()->routeIs('dashboard') ? 'text-grok' : 'text-muted hover:text-white' }} transition">
+               class="{{ request()->routeIs('dashboard') ? 'text-brand' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]' }} transition">
                 Dashboard
             </a>
             <a href="{{ route('accounts.index') }}"
-               class="{{ request()->routeIs('accounts.*') ? 'text-emerald-400' : 'text-gray-300 hover:text-white' }} transition">
+               class="{{ request()->routeIs('accounts.*') ? 'text-brand' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]' }} transition">
                 Accounts
             </a>
             <a href="{{ route('categories.index') }}"
-               class="{{ request()->routeIs('categories.*') ? 'text-emerald-400' : 'text-gray-300 hover:text-white' }} transition">
+               class="{{ request()->routeIs('categories.*') ? 'text-brand' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]' }} transition">
                 Categories
             </a>
             <a href="{{ route('transactions.index') }}"
-               class="{{ request()->routeIs('transactions.*') ? 'text-emerald-400' : 'text-gray-300 hover:text-white' }} transition">
+               class="{{ request()->routeIs('transactions.*') ? 'text-brand' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]' }} transition">
                 Transactions
             </a>
 

@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 @php
     $settingsUser = auth()->user();
-    $themePreference = $settingsUser?->theme_preference ?? 'system';
+    $themePreference = match ($settingsUser?->theme_preference ?? 'light') {
+        'ember' => 'light',
+        'light', 'dark', 'system', 'blue' => $settingsUser?->theme_preference ?? 'light',
+        default => 'light',
+    };
     $fontSizePreference = $settingsUser?->font_size_preference ?? 'default';
+    $unreadNotificationCount = $settingsUser ? $settingsUser->appNotifications()->whereNull('read_at')->count() : 0;
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-preference="{{ $themePreference }}" data-font-size="{{ $fontSizePreference }}">
 <head>
@@ -13,12 +18,13 @@
     <script>
         (() => {
             const root = document.documentElement;
-            const themePreference = root.dataset.themePreference || 'system';
+            const themePreference = root.dataset.themePreference || 'light';
             const fontSizePreference = root.dataset.fontSize || 'default';
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const shouldUseDark = themePreference === 'dark' || (themePreference === 'system' && prefersDark);
 
             root.classList.toggle('dark', shouldUseDark);
+            root.dataset.themePreference = themePreference;
             root.dataset.fontSize = fontSizePreference;
         })();
     </script>
@@ -60,13 +66,27 @@
 
                 <div class="flex items-center gap-3 self-stretch sm:self-auto">
                     <span class="topbar-pill">{{ now()->format('D, M j') }}</span>
-                    <span class="topbar-pill hidden sm:inline-flex">All balances synced</span>
+                    <a href="{{ route('notifications.index') }}" class="topbar-pill notification-pill">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0h6z" />
+                        </svg>
+                        <span>Notifications</span>
+                        @if ($unreadNotificationCount > 0)
+                            <span class="notification-pill-count">{{ $unreadNotificationCount }}</span>
+                        @endif
+                    </a>
                 </div>
             </header>
 
             <main class="content-shell">
                 @if(session('success'))
                     <div id="flash" data-success="{{ session('success') }}" data-undo="{{ session('undo') ?? '' }}" class="hidden"></div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="alert-error">
+                        {{ $errors->first() }}
+                    </div>
                 @endif
 
                 @if (isset($header))

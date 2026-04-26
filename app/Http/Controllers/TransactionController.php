@@ -1,13 +1,20 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exceptions\InsufficientBalanceException;
 use App\Models\Transaction;
 use App\Models\Account;
 use App\Models\Category;
+use App\Services\TransactionRecorder;
 use Illuminate\Http\Request;
 
 class TransactionController extends Controller
 {
+    public function __construct(
+        protected TransactionRecorder $transactionRecorder
+    ) {
+    }
+
     public function index(Request $request)
     {
         $query = Transaction::where('user_id', auth()->id())->with(['account','category']);
@@ -111,39 +118,29 @@ class TransactionController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'account_id'       => 'required|exists:accounts,id',
-            'category_id'      => 'required|exists:categories,id',
+            'account_id'       => 'required|integer',
+            'category_id'      => 'required|integer',
             'type'             => 'required|in:income,expense',
             'amount'           => 'required|numeric|min:0.01',
             'description'      => 'nullable|string|max:255',
             'transaction_date' => 'required|date',
         ]);
 
-        $account = Account::find($request->account_id);
-        // Prevent expense that exceeds account balance
-        if ($request->type === 'expense' && $account && $account->balance < $request->amount) {
+        try {
+            $this->transactionRecorder->record($request->user(), $request->only(
+                'account_id',
+                'category_id',
+                'type',
+                'amount',
+                'description',
+                'transaction_date'
+            ));
+        } catch (InsufficientBalanceException $exception) {
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json(['message' => 'Insufficient account balance'], 422);
+                return response()->json(['message' => $exception->getMessage()], 422);
             }
-            return back()->withErrors(['amount' => 'Insufficient account balance'])->withInput();
+            return back()->withErrors(['amount' => $exception->getMessage()])->withInput();
         }
-
-        Transaction::create([
-            'user_id'          => auth()->id(),
-            'account_id'       => $request->account_id,
-            'category_id'      => $request->category_id,
-            'type'             => $request->type,
-            'amount'           => $request->amount,
-            'description'      => $request->description,
-            'transaction_date' => $request->transaction_date,
-        ]);
-
-        if ($request->type === 'income') {
-            $account->balance += $request->amount;
-        } else {
-            $account->balance -= $request->amount;
-        }
-        $account->save();
 
         return redirect()->route('transactions.index')->with('success', 'Transaction added successfully!');
     }

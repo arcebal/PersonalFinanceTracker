@@ -1,10 +1,32 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@php
+    $settingsUser = auth()->user();
+    $themePreference = match ($settingsUser?->theme_preference ?? 'light') {
+        'ember' => 'light',
+        'light', 'dark', 'system', 'blue' => $settingsUser?->theme_preference ?? 'light',
+        default => 'light',
+    };
+    $fontSizePreference = $settingsUser?->font_size_preference ?? 'default';
+@endphp
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-preference="{{ $themePreference }}" data-font-size="{{ $fontSizePreference }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>TrackerYarn - @yield('title','Auth')</title>
+    <script>
+        (() => {
+            const root = document.documentElement;
+            const themePreference = root.dataset.themePreference || 'light';
+            const fontSizePreference = root.dataset.fontSize || 'default';
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const shouldUseDark = themePreference === 'dark' || (themePreference === 'system' && prefersDark);
+
+            root.classList.toggle('dark', shouldUseDark);
+            root.dataset.themePreference = themePreference;
+            root.dataset.fontSize = fontSizePreference;
+        })();
+    </script>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 <body>

@@ -23,7 +23,7 @@ class SettingsAppearanceUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'theme_preference' => ['required', Rule::in(['light', 'dark', 'system'])],
+            'theme_preference' => ['required', Rule::in(['light', 'dark', 'system', 'blue'])],
             'font_size_preference' => ['required', Rule::in(['small', 'default', 'large'])],
         ];
     }

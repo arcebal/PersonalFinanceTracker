@@ -12,6 +12,7 @@
 
         <div class="page-actions">
             <a href="{{ route('budgets.index') }}" class="btn-secondary">Manage budgets</a>
+            <a href="{{ route('recurring-transactions.index') }}" class="btn-secondary">Recurring items</a>
             <button id="exportPdfBtn" class="btn-primary">Export PDF report</button>
         </div>
     </section>
@@ -19,6 +20,115 @@
     <div class="flex items-center justify-end">
         <div id="exportStatus" class="text-sm text-muted"></div>
     </div>
+
+    <section class="content-grid">
+        <article class="section-card col-span-12 xl:col-span-5">
+            <div class="panel-heading">
+                <div class="panel-title-block">
+                    <span class="page-kicker">Insights</span>
+                    <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Money signals</h2>
+                    <p class="panel-subtitle">Rule-based insights call out trends, risks, and upcoming recurring activity.</p>
+                </div>
+            </div>
+
+            @if ($insights->count())
+                <div class="stack-list mt-6">
+                    @foreach ($insights as $insight)
+                        <article class="insight-card">
+                            <div class="table-title">{{ $insight['headline'] }}</div>
+                            <p class="text-sm text-muted">{{ $insight['body'] }}</p>
+                            @if (! empty($insight['action_url']))
+                                <a href="{{ $insight['action_url'] }}" class="helper-link">Open related view</a>
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @else
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16M7 16V9m5 7V5m5 11v-4" />
+                        </svg>
+                    </div>
+                    <p>Add more transactions and budgets to unlock insight cards here.</p>
+                </div>
+            @endif
+        </article>
+
+        <article class="section-card col-span-12 xl:col-span-3">
+            <div class="panel-heading">
+                <div class="panel-title-block">
+                    <span class="page-kicker">Recurring</span>
+                    <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Upcoming due items</h2>
+                    <p class="panel-subtitle">Bills and repeating income scheduled in the next seven days.</p>
+                </div>
+                <a href="{{ route('recurring-transactions.index') }}" class="btn-secondary">Manage</a>
+            </div>
+
+            @if ($upcomingRecurringTransactions->count())
+                <div class="stack-list mt-6">
+                    @foreach ($upcomingRecurringTransactions as $item)
+                        <article class="list-card">
+                            <div class="table-title">{{ $item->description }}</div>
+                            <div class="text-sm text-muted">{{ $item->next_due_date->format('M d, Y') }} · {{ ucfirst($item->frequency) }}</div>
+                            <div class="inline-meta">
+                                <span class="{{ $item->type === 'income' ? 'badge-income' : 'badge-expense' }}">
+                                    {{ $item->type === 'income' ? '+' : '-' }}P{{ number_format($item->amount, 2) }}
+                                </span>
+                                <span class="topbar-pill">{{ $item->account->name }}</span>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            @else
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 4v4m10-4v4M4 10h16M6 20h12a2 2 0 002-2V8H4v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <p>No recurring items are due in the next seven days.</p>
+                </div>
+            @endif
+        </article>
+
+        <article class="section-card col-span-12 xl:col-span-4">
+            <div class="panel-heading">
+                <div class="panel-title-block">
+                    <span class="page-kicker">Inbox</span>
+                    <h2 class="text-2xl font-extrabold text-[var(--text-primary)]">Notification preview</h2>
+                    <p class="panel-subtitle">{{ $unreadNotificationCount }} unread notification{{ $unreadNotificationCount === 1 ? '' : 's' }} right now.</p>
+                </div>
+                <a href="{{ route('notifications.index') }}" class="btn-secondary">Open inbox</a>
+            </div>
+
+            @if ($notificationPreview->count())
+                <div class="stack-list mt-6">
+                    @foreach ($notificationPreview as $notification)
+                        <article class="list-card">
+                            <div class="inline-meta">
+                                <span class="status-chip {{ $notification->read_at ? 'status-muted' : 'status-warning' }}">
+                                    {{ $notification->read_at ? 'Read' : 'Unread' }}
+                                </span>
+                                <span class="text-sm text-muted">{{ $notification->created_at->diffForHumans() }}</span>
+                            </div>
+                            <div class="table-title">{{ $notification->title }}</div>
+                            <p class="text-sm text-muted">{{ $notification->message }}</p>
+                        </article>
+                    @endforeach
+                </div>
+            @else
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0h6z" />
+                        </svg>
+                    </div>
+                    <p>No notifications yet. Scheduled reminders and budget alerts will appear here.</p>
+                </div>
+            @endif
+        </article>
+    </section>
 
     <section class="metric-grid">
         <article class="metric-card">
@@ -115,7 +225,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16M7 16V9m5 7V5m5 11v-4" />
                             </svg>
                         </div>
-                        <p>Create monthly budgets to compare targets and actual spend on this dashboard.</p>
+                        <p>Create monthly expense budgets to compare targets and actual spend on this dashboard.</p>
                     </div>
                 @endif
             </div>

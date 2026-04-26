@@ -1,6 +1,7 @@
 @php
     $user = Auth::user();
     $avatarUrl = $user->avatarUrl();
+    $sidebarUnreadNotificationCount = $user->appNotifications()->whereNull('read_at')->count();
 @endphp
 
 <aside class="sidebar-shell flex h-full flex-col gap-6">
@@ -86,6 +87,27 @@
                 </svg>
             </span>
             <span>Budgets</span>
+        </a>
+
+        <a href="{{ route('recurring-transactions.index') }}" class="sidebar-nav-link {{ request()->routeIs('recurring-transactions.*') ? 'is-active' : '' }}">
+            <span class="sidebar-nav-icon">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 4v4m10-4v4M4 10h16M6 20h12a2 2 0 002-2V8H4v10a2 2 0 002 2z" />
+                </svg>
+            </span>
+            <span>Recurring</span>
+        </a>
+
+        <a href="{{ route('notifications.index') }}" class="sidebar-nav-link {{ request()->routeIs('notifications.*') ? 'is-active' : '' }}">
+            <span class="sidebar-nav-icon">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0h6z" />
+                </svg>
+            </span>
+            <span>Notifications</span>
+            @if ($sidebarUnreadNotificationCount > 0)
+                <span class="sidebar-counter">{{ $sidebarUnreadNotificationCount }}</span>
+            @endif
         </a>
 
         <a href="{{ route('profile.edit') }}" class="sidebar-nav-link {{ request()->routeIs('profile.*') ? 'is-active' : '' }}">

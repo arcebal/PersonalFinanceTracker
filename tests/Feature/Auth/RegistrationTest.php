@@ -26,6 +26,12 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('onboarding.start', absolute: false));
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@example.com',
+            'theme_preference' => 'light',
+            'font_size_preference' => 'default',
+            'onboarding_completed_at' => null,
+        ]);
     }
 }

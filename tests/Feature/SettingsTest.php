@@ -20,7 +20,14 @@ class SettingsTest extends TestCase
             ->actingAs($user)
             ->get('/settings/profile');
 
-        $response->assertOk();
+        $response
+            ->assertOk()
+            ->assertSee('Pink')
+            ->assertSee('Dark')
+            ->assertSee('System')
+            ->assertSee('Blue')
+            ->assertDontSee('Blushglass')
+            ->assertDontSee('value="ember"', false);
     }
 
     public function test_guest_cannot_access_settings_routes(): void
@@ -70,6 +77,27 @@ class SettingsTest extends TestCase
         $response
             ->assertSessionHasErrors(['theme_preference', 'font_size_preference'])
             ->assertRedirect('/settings/profile');
+    }
+
+    public function test_appearance_settings_can_be_updated_to_blue(): void
+    {
+        $user = User::factory()->create([
+            'theme_preference' => 'system',
+            'font_size_preference' => 'default',
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->patch('/settings/profile/appearance', [
+                'theme_preference' => 'blue',
+                'font_size_preference' => 'default',
+            ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/settings/profile');
+
+        $this->assertSame('blue', $user->fresh()->theme_preference);
     }
 
     public function test_avatar_can_be_uploaded(): void

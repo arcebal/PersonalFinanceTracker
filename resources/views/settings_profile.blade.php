@@ -5,6 +5,33 @@
 @section('content')
 @php
     $avatarUrl = $user->avatarUrl();
+    $selectedThemePreference = match ($user->theme_preference ?? 'light') {
+        'ember' => 'light',
+        'light', 'dark', 'system', 'blue' => $user->theme_preference ?? 'light',
+        default => 'light',
+    };
+    $themeOptions = [
+        'light' => [
+            'label' => 'Pink',
+            'note' => 'Use the warm pink glass workspace across the whole product.',
+            'preview' => 'settings-theme-preview--light',
+        ],
+        'dark' => [
+            'label' => 'Dark',
+            'note' => 'Always use the darker glass workspace.',
+            'preview' => 'settings-theme-preview--dark',
+        ],
+        'system' => [
+            'label' => 'System',
+            'note' => 'Follow your device preference for dark mode.',
+            'preview' => 'settings-theme-preview--system',
+        ],
+        'blue' => [
+            'label' => 'Blue',
+            'note' => 'Switch back to the original cool blue glass palette.',
+            'preview' => 'settings-theme-preview--blue',
+        ],
+    ];
 @endphp
 <div class="page-shell">
     <section class="section-card">
@@ -40,20 +67,25 @@
                         <p class="field-note">Choose how the workspace should appear across the app.</p>
                     </div>
 
-                    <div class="settings-choice-grid">
-                        @foreach (['light' => 'Light', 'dark' => 'Dark', 'system' => 'System'] as $value => $label)
+                    <div class="settings-choice-grid settings-choice-grid--themes">
+                        @foreach ($themeOptions as $value => $themeOption)
                             <label class="settings-choice-card">
                                 <input
                                     type="radio"
                                     name="theme_preference"
                                     value="{{ $value }}"
                                     class="settings-choice-input"
-                                    {{ old('theme_preference', $user->theme_preference ?? 'system') === $value ? 'checked' : '' }}
+                                    {{ old('theme_preference', $selectedThemePreference) === $value ? 'checked' : '' }}
                                 >
                                 <span class="settings-choice-copy">
-                                    <span class="settings-choice-title">{{ $label }}</span>
+                                    <span class="settings-theme-preview {{ $themeOption['preview'] }}" aria-hidden="true">
+                                        <span class="settings-theme-preview-swatch"></span>
+                                        <span class="settings-theme-preview-swatch"></span>
+                                        <span class="settings-theme-preview-swatch"></span>
+                                    </span>
+                                    <span class="settings-choice-title">{{ $themeOption['label'] }}</span>
                                     <span class="settings-choice-note">
-                                        {{ $value === 'system' ? 'Follow your device preference.' : 'Always use this appearance mode.' }}
+                                        {{ $themeOption['note'] }}
                                     </span>
                                 </span>
                             </label>

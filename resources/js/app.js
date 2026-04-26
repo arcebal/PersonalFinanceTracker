@@ -15,21 +15,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const root = document.documentElement;
     const applyThemePreference = (themePreference) => {
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const shouldUseDark = themePreference === 'dark' || (themePreference === 'system' && prefersDark);
+        const resolvedTheme = themePreference || 'light';
+        const shouldUseDark = resolvedTheme === 'dark' || (resolvedTheme === 'system' && prefersDark);
         root.classList.toggle('dark', shouldUseDark);
-        root.dataset.themePreference = themePreference;
+        root.dataset.themePreference = resolvedTheme;
     };
 
     const applyFontSizePreference = (fontSizePreference) => {
         root.dataset.fontSize = fontSizePreference;
     };
 
-    applyThemePreference(root.dataset.themePreference || 'system');
+    applyThemePreference(root.dataset.themePreference || 'light');
     applyFontSizePreference(root.dataset.fontSize || 'default');
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const syncSystemTheme = () => {
-        if ((root.dataset.themePreference || 'system') === 'system') {
+        if ((root.dataset.themePreference || 'light') === 'system') {
             applyThemePreference('system');
         }
     };
