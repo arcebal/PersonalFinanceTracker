@@ -7,6 +7,38 @@
         default => 'light',
     };
     $fontSizePreference = $settingsUser?->font_size_preference ?? 'default';
+    $teamMembers = [
+        'john' => [
+            'name' => 'John Clifford Ceballos',
+            'role' => 'Project Manager',
+            'image' => asset('team/john.png'),
+            'image_alt' => 'John Clifford Ceballos photo',
+            'facebook_url' => 'https://www.facebook.com/share/18gW7HUnkC/',
+            'instagram_url' => null,
+            'email' => null,
+            'summary' => 'Keeps the build aligned by coordinating scope, product direction, and delivery across the team.',
+        ],
+        'argie' => [
+            'name' => 'Argie Matondo',
+            'role' => 'Hacker',
+            'image' => asset('team/argie.png'),
+            'image_alt' => 'Argie Matondo photo',
+            'facebook_url' => 'https://www.facebook.com/share/18qrdwx6cd/',
+            'instagram_url' => null,
+            'email' => null,
+            'summary' => 'Focuses on implementation details and technical problem-solving to keep the product moving.',
+        ],
+        'clark' => [
+            'name' => 'Clark Einon Estrada',
+            'role' => 'Hipster',
+            'image' => asset('team/clark2.jpeg'),
+            'image_alt' => 'Clark Einon Estrada photo',
+            'facebook_url' => 'https://www.facebook.com/share/1EogzsrRhU/',
+            'instagram_url' => null,
+            'email' => null,
+            'summary' => 'Shapes the look and feel of the experience so the product stays polished and approachable.',
+        ],
+    ];
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme-preference="{{ $themePreference }}" data-font-size="{{ $fontSizePreference }}">
 <head>
@@ -30,7 +62,32 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
-    <div class="landing-shell" x-data="{ mobileMenuOpen: false }">
+    <div
+        class="landing-shell"
+        x-data="{
+            mobileMenuOpen: false,
+            activeTeamKey: null,
+            lastTeamTrigger: null,
+            teamMembers: {{ \Illuminate\Support\Js::from($teamMembers) }},
+            get activeTeam() {
+                return this.activeTeamKey ? this.teamMembers[this.activeTeamKey] : null;
+            },
+            openTeam(key, trigger) {
+                this.activeTeamKey = key;
+                this.lastTeamTrigger = trigger;
+                document.documentElement.style.overflow = 'hidden';
+                document.body.style.overflow = 'hidden';
+                this.$nextTick(() => this.$refs.teamModalClose?.focus());
+            },
+            closeTeam() {
+                this.activeTeamKey = null;
+                document.documentElement.style.overflow = '';
+                document.body.style.overflow = '';
+                this.$nextTick(() => this.lastTeamTrigger?.focus());
+            }
+        }"
+        @keydown.escape.window="activeTeamKey && closeTeam()"
+    >
         <nav class="landing-nav">
             <a href="/" class="brand-lockup">
                 <span class="brand-mark">
@@ -337,35 +394,117 @@
             </div>
 
             <div class="landing-team-grid mt-8">
-                <article class="team-card landing-motion-card" style="--card-delay: 0ms;">
-                    <div class="team-card-media">
-                        <img src="{{ asset('team/john.png') }}" alt="John Clifford Ceballos photo" class="team-card-image">
-                    </div>
-                    <div class="team-card-body">
-                        <div class="team-role">Project Manager</div>
-                        <h3>John Clifford Ceballos</h3>
-                    </div>
-                </article>
+                @foreach ($teamMembers as $teamKey => $member)
+                    <button
+                        type="button"
+                        class="team-card team-card-trigger landing-motion-card"
+                        style="--card-delay: {{ $loop->index * 120 }}ms;"
+                        @click="openTeam('{{ $teamKey }}', $event.currentTarget)"
+                        :aria-expanded="activeTeamKey === '{{ $teamKey }}'"
+                        aria-controls="team-profile-modal"
+                    >
+                        <span class="team-card-media">
+                            <img src="{{ $member['image'] }}" alt="{{ $member['image_alt'] }}" class="team-card-image">
+                        </span>
+                        <span class="team-card-body">
+                            <span class="team-role">{{ $member['role'] }}</span>
+                            <h3>{{ $member['name'] }}</h3>
+                            <span class="team-card-summary">{{ $member['summary'] }}</span>
+                            <span class="team-card-hint">
+                                <span>Open profile</span>
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </span>
+                        </span>
+                    </button>
+                @endforeach
+            </div>
 
-                <article class="team-card landing-motion-card" style="--card-delay: 120ms;">
-                    <div class="team-card-media">
-                        <img src="{{ asset('team/argie.png') }}" alt="Argie Matondo photo" class="team-card-image">
-                    </div>
-                    <div class="team-card-body">
-                        <div class="team-role">Hacker</div>
-                        <h3>Argie Matondo</h3>
-                    </div>
-                </article>
+            <div
+                x-cloak
+                x-show="activeTeam"
+                id="team-profile-modal"
+                class="team-modal-backdrop"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="team-modal-title"
+                @click.self="closeTeam()"
+                x-transition.opacity
+            >
+                <div class="team-modal-panel" x-transition.scale.origin.bottom.duration.250ms>
+                    <button
+                        type="button"
+                        class="team-modal-close"
+                        @click="closeTeam()"
+                        x-ref="teamModalClose"
+                        aria-label="Close team profile"
+                    >
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18" />
+                        </svg>
+                    </button>
 
-                <article class="team-card landing-motion-card" style="--card-delay: 240ms;">
-                    <div class="team-card-media">
-                        <img src="{{ asset('team/clark2.jpeg') }}" alt="Clark Einon Estrada photo" class="team-card-image">
-                    </div>
-                    <div class="team-card-body">
-                        <div class="team-role">Hipster</div>
-                        <h3>Clark Einon Estrada</h3>
-                    </div>
-                </article>
+                    <template x-if="activeTeam">
+                        <div class="team-modal-layout">
+                            <div class="team-modal-media">
+                                <img :src="activeTeam.image" :alt="activeTeam.image_alt" class="team-modal-image">
+                            </div>
+
+                            <div class="team-modal-content">
+                                <span class="team-role" x-text="activeTeam.role"></span>
+                                <h3 id="team-modal-title" class="team-modal-title" x-text="activeTeam.name"></h3>
+                                <p class="team-modal-copy" x-text="activeTeam.summary"></p>
+
+                                <div class="team-social-grid">
+                                    <a
+                                        :href="activeTeam.facebook_url"
+                                        class="team-social-link"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <span class="team-social-icon" aria-hidden="true">
+                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M13.5 21v-7h2.4l.4-3h-2.8V9.1c0-.9.2-1.6 1.5-1.6H16V4.8c-.4 0-.9-.1-1.8-.1-2.7 0-4.2 1.6-4.2 4.4V11H7.5v3H10v7h3.5z" />
+                                            </svg>
+                                        </span>
+                                        <span class="team-social-copy">
+                                            <span class="team-social-label">Facebook</span>
+                                            <span class="team-social-status">Live now</span>
+                                        </span>
+                                    </a>
+
+                                    <button type="button" class="team-social-link is-disabled" disabled aria-disabled="true">
+                                        <span class="team-social-icon" aria-hidden="true">
+                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
+                                                <circle cx="12" cy="12" r="4" />
+                                                <circle cx="17.4" cy="6.6" r="1" fill="currentColor" stroke="none" />
+                                            </svg>
+                                        </span>
+                                        <span class="team-social-copy">
+                                            <span class="team-social-label">Instagram</span>
+                                            <span class="team-social-status">Coming soon</span>
+                                        </span>
+                                    </button>
+
+                                    <button type="button" class="team-social-link is-disabled" disabled aria-disabled="true">
+                                        <span class="team-social-icon" aria-hidden="true">
+                                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16v12H4z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4 7 8 6 8-6" />
+                                            </svg>
+                                        </span>
+                                        <span class="team-social-copy">
+                                            <span class="team-social-label">Email</span>
+                                            <span class="team-social-status">Coming soon</span>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
             </div>
         </footer>
     </div>
