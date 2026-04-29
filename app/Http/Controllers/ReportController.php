@@ -12,8 +12,6 @@ class ReportController extends Controller
         $data = $request->only(['pieImage', 'barImage', 'budgetImage', 'pieLabels', 'months', 'income', 'expense', 'budgetLabels', 'budgetAmounts', 'spentAmounts']);
         $filename = 'report_' . now()->format('Ymd_His') . '.pdf';
 
-        // Render the PDF view with the provided images/data
-        // Render view (report_pdf.blade.php)
         $html = view('report_pdf', $data)->render();
 
         $pdf = Pdf::loadHTML($html);
