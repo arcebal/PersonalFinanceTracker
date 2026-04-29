@@ -1,11 +1,13 @@
+FROM composer:2 AS composer
 FROM php:8.4-cli
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 RUN apt-get update && apt-get install -y \
     libpng-dev libjpeg-dev libfreetype6-dev libzip-dev libxml2-dev \
     nodejs npm unzip git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql mbstring zip xml tokenizer \
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    && docker-php-ext-install gd pdo pdo_mysql mbstring zip xml tokenizer
 
 WORKDIR /app
 COPY . .
