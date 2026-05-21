@@ -12,151 +12,127 @@
             </span>
             <span class="brand-copy">
                 <strong>TrackerYarn</strong>
-                <span>Personal finance command center</span>
             </span>
         </a>
 
     </div>
 
-    <div class="sidebar-card">
-        <div class="sidebar-group">Welcome</div>
-        <div class="sidebar-welcome mt-3">
-            <div class="sidebar-welcome-row">
-                @if ($avatarUrl)
-                    <img src="{{ $avatarUrl }}" alt="{{ $user->name }}" class="sidebar-welcome-avatar">
-                @else
-                    <span class="sidebar-welcome-avatar sidebar-welcome-avatar-fallback" aria-hidden="true">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" />
-                        </svg>
-                    </span>
-                @endif
+    <nav class="sidebar-nav flex-1 flex flex-col justify-start pt-1">
 
-                <div class="min-w-0">
-                    <div class="sidebar-welcome-title">Welcome back, {{ $user->name }}</div>
-                </div>
-            </div>
-
-            <p class="sidebar-welcome-copy text-sm text-muted">Track balances, monitor cash flow, and keep budgeting in one calm workspace.</p>
-        </div>
-    </div>
-
-    <nav class="sidebar-nav">
-        <span class="sidebar-group">Workspace</span>
-
-        <a href="{{ route('dashboard') }}" class="sidebar-nav-link {{ request()->routeIs('dashboard') ? 'is-active' : '' }}">
+        <a href="{{ route('dashboard') }}"
+            class="sidebar-nav-link flex items-center {{ request()->routeIs('dashboard') ? 'is-active' : '' }}">
             <span class="sidebar-nav-icon">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 12l7-7 4 4 5-5v16H4V12z" />
                 </svg>
             </span>
             <span>Dashboard</span>
+            <x-sidebar-badge :count="$sidebarBadges['dashboard']['count']" :type="$sidebarBadges['dashboard']['type']" :hidden="$sidebarBadges['dashboard']['hidden']" key="dashboard" />
         </a>
 
-        <a href="{{ route('accounts.index') }}" class="sidebar-nav-link {{ request()->routeIs('accounts.*') ? 'is-active' : '' }}">
+        <a href="{{ route('accounts.index') }}"
+            class="sidebar-nav-link flex items-center {{ request()->routeIs('accounts.*') ? 'is-active' : '' }}">
             <span class="sidebar-nav-icon">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.5h18v9A2.5 2.5 0 0118.5 20h-13A2.5 2.5 0 013 17.5v-9zm0 3h18M7 5h10" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M3 8.5h18v9A2.5 2.5 0 0118.5 20h-13A2.5 2.5 0 013 17.5v-9zm0 3h18M7 5h10" />
                 </svg>
             </span>
             <span>Accounts</span>
+            <x-sidebar-badge :count="$sidebarBadges['accounts']['count']" :type="$sidebarBadges['accounts']['type']" :hidden="$sidebarBadges['accounts']['hidden']" key="accounts" />
         </a>
 
-        <a href="{{ route('transactions.index') }}" class="sidebar-nav-link {{ request()->routeIs('transactions.*') ? 'is-active' : '' }}">
+        <a href="{{ route('transactions.index') }}"
+            class="sidebar-nav-link flex items-center {{ request()->routeIs('transactions.*') ? 'is-active' : '' }}">
             <span class="sidebar-nav-icon">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14M5 12h14M9 17h10" />
                 </svg>
             </span>
             <span>Transactions</span>
+            <x-sidebar-badge :count="$sidebarBadges['transactions']['count']" :type="$sidebarBadges['transactions']['type']" :hidden="$sidebarBadges['transactions']['hidden']" key="transactions" />
         </a>
 
-        <a href="{{ route('categories.index') }}" class="sidebar-nav-link {{ request()->routeIs('categories.*') ? 'is-active' : '' }}">
+        <a href="{{ route('categories.index') }}"
+            class="sidebar-nav-link flex items-center {{ request()->routeIs('categories.*') ? 'is-active' : '' }}">
             <span class="sidebar-nav-icon">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 7h4l2 2h4v8H7V7zm-2 0h2v10a2 2 0 002 2h8" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7 7h4l2 2h4v8H7V7zm-2 0h2v10a2 2 0 002 2h8" />
                 </svg>
             </span>
             <span>Categories</span>
+            <x-sidebar-badge :count="$sidebarBadges['categories']['count']" :type="$sidebarBadges['categories']['type']" :hidden="$sidebarBadges['categories']['hidden']" key="categories" />
         </a>
 
-        <a href="{{ route('budgets.index') }}" class="sidebar-nav-link {{ request()->routeIs('budgets.*') ? 'is-active' : '' }}">
+        <a href="{{ route('budgets.index') }}"
+            class="sidebar-nav-link flex items-center {{ request()->routeIs('budgets.*') ? 'is-active' : '' }}">
             <span class="sidebar-nav-icon">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 19h16M7 16V9m5 7V5m5 11v-4" />
                 </svg>
             </span>
             <span>Budgets</span>
+            <x-sidebar-badge :count="$sidebarBadges['budgets']['count']" :type="$sidebarBadges['budgets']['type']" :hidden="$sidebarBadges['budgets']['hidden']" key="budgets" />
         </a>
 
-        <a href="{{ route('recurring-transactions.index') }}" class="sidebar-nav-link {{ request()->routeIs('recurring-transactions.*') ? 'is-active' : '' }}">
+        <a href="{{ route('recurring-transactions.index') }}"
+            class="sidebar-nav-link flex items-center {{ request()->routeIs('recurring-transactions.*') ? 'is-active' : '' }}">
             <span class="sidebar-nav-icon">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 4v4m10-4v4M4 10h16M6 20h12a2 2 0 002-2V8H4v10a2 2 0 002 2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M7 4v4m10-4v4M4 10h16M6 20h12a2 2 0 002-2V8H4v10a2 2 0 002 2z" />
                 </svg>
             </span>
             <span>Recurring</span>
+            <x-sidebar-badge :count="$sidebarBadges['recurring']['count']" :type="$sidebarBadges['recurring']['type']" :hidden="$sidebarBadges['recurring']['hidden']" key="recurring" />
         </a>
 
-        <a href="{{ route('notifications.index') }}" class="sidebar-nav-link {{ request()->routeIs('notifications.*') ? 'is-active' : '' }}">
+        <a href="{{ route('profile.edit') }}"
+            class="sidebar-nav-link flex items-center {{ request()->routeIs('profile.*') ? 'is-active' : '' }}">
             <span class="sidebar-nav-icon">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0h6z" />
-                </svg>
-            </span>
-            <span>Notifications</span>
-            @if ($sidebarUnreadNotificationCount > 0)
-                <span class="sidebar-counter">{{ $sidebarUnreadNotificationCount }}</span>
-            @endif
-        </a>
-
-        <a href="{{ route('profile.edit') }}" class="sidebar-nav-link {{ request()->routeIs('profile.*') ? 'is-active' : '' }}">
-            <span class="sidebar-nav-icon">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" />
                 </svg>
             </span>
             <span>Profile</span>
+            <x-sidebar-badge :count="$sidebarBadges['profile']['count']" :type="$sidebarBadges['profile']['type']" :hidden="$sidebarBadges['profile']['hidden']" key="profile" />
         </a>
     </nav>
 
-    <div class="sidebar-card mt-auto space-y-3">
-        <div class="sidebar-group">Quick actions</div>
-        <div class="grid gap-3">
-            <a href="{{ route('transactions.create') }}" class="btn-primary">New transaction</a>
-            <a href="{{ route('accounts.create') }}" class="btn-secondary">Add account</a>
-        </div>
-    </div>
-
-    <div class="relative" x-data="{ open: false }" @click.away="open = false">
-        <button type="button" class="sidebar-user w-full rounded-[20px] border border-[var(--border)] bg-[var(--bg-panel-soft)] px-3 py-3 text-left" @click="open = ! open">
+    <div class="relative mt-auto" x-data="{ open: false }" @click.away="open = false">
+        <button type="button"
+            class="sidebar-user w-full rounded-[20px] border border-[var(--border)] bg-[var(--bg-panel-soft)] px-3 py-3 text-left"
+            @click="open = ! open">
             <span class="flex items-center gap-3">
                 @if ($avatarUrl)
                     <img src="{{ $avatarUrl }}" alt="{{ $user->name }}" class="sidebar-avatar-image">
                 @else
                     <span class="sidebar-avatar" aria-hidden="true">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" />
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0" />
                         </svg>
                     </span>
                 @endif
                 <span class="min-w-0">
-                    <span class="block truncate text-sm font-bold text-[var(--text-primary)]">{{ $user->name }}</span>
+                    <span
+                        class="block truncate text-sm font-bold text-[var(--text-primary)]">{{ $user->name }}</span>
                     <span class="block truncate text-xs text-[var(--text-tertiary)]">{{ $user->email }}</span>
                 </span>
             </span>
-            <svg class="h-4 w-4 shrink-0 text-[var(--text-tertiary)]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.29l3.71-4.06a.75.75 0 111.1 1.02l-4.24 4.66a.75.75 0 01-1.1 0L5.21 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+            <svg class="h-4 w-4 shrink-0 text-[var(--text-tertiary)]" viewBox="0 0 20 20" fill="currentColor"
+                aria-hidden="true">
+                <path fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.29l3.71-4.06a.75.75 0 111.1 1.02l-4.24 4.66a.75.75 0 01-1.1 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd" />
             </svg>
         </button>
 
-        <div
-            x-cloak
-            x-show="open"
-            x-transition
-            class="absolute bottom-full left-0 mb-3 w-full rounded-[20px] border border-[var(--border)] bg-[var(--bg-panel-strong)] p-2 shadow-2xl backdrop-blur-2xl"
-        >
-            <a href="{{ route('profile.edit') }}" class="sidebar-nav-link">Edit profile</a>
+        <div x-cloak x-show="open" x-transition
+            class="absolute bottom-full left-0 mb-3 w-full rounded-[20px] border border-[var(--border)] bg-[var(--bg-panel-strong)] p-2 shadow-2xl backdrop-blur-2xl">
             <a href="{{ route('settings.profile') }}" class="sidebar-nav-link">Settings</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -164,4 +140,36 @@
             </form>
         </div>
     </div>
+
+    @if (auth()->check())
+        @once
+            <script>
+                (function() {
+                    const fetchBadges = () => {
+                        fetch('{{ route('api.sidebar-badges') }}', {
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                                }
+                            })
+                            .then(r => r.json())
+                            .then(data => {
+                                window.dispatchEvent(new CustomEvent('badge-update', {
+                                    detail: data
+                                }));
+                            })
+                            .catch(() => {});
+                    };
+
+                    setInterval(fetchBadges, 30000);
+
+                    document.addEventListener('visibilitychange', () => {
+                        if (!document.hidden) fetchBadges();
+                    });
+                })
+                ();
+            </script>
+        @endonce
+    @endif
 </aside>

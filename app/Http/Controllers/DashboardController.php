@@ -1,22 +1,19 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\AppNotification;
 use App\Models\Account;
 use App\Models\Budget;
 use App\Models\Category;
 use App\Models\RecurringTransaction;
 use App\Models\Transaction;
 use App\Services\BudgetHealthService;
-use App\Services\InsightService;
 
 class DashboardController extends Controller
 {
     public function __construct(
         protected BudgetHealthService $budgetHealthService,
-        protected InsightService $insightService
-    ) {
-    }
+    ) {}
 
     public function index()
     {
@@ -38,11 +35,11 @@ class DashboardController extends Controller
             ->groupBy('category_id')
             ->with('category')
             ->get()
-            ->filter(fn (Transaction $transaction) => $transaction->category !== null);
+            ->filter(fn(Transaction $transaction) => $transaction->category !== null);
 
-        $pieLabels = $expenseBreakdown->map(fn (Transaction $transaction) => $transaction->category->name)->values();
-        $pieData = $expenseBreakdown->map(fn (Transaction $transaction) => (float) $transaction->total_amount)->values();
-        $pieColors = $expenseBreakdown->map(fn (Transaction $transaction) => $transaction->category->color)->values();
+        $pieLabels = $expenseBreakdown->map(fn(Transaction $transaction) => $transaction->category->name)->values();
+        $pieData = $expenseBreakdown->map(fn(Transaction $transaction) => (float) $transaction->total_amount)->values();
+        $pieColors = $expenseBreakdown->map(fn(Transaction $transaction) => $transaction->category->color)->values();
 
         $months = [];
         $income = [];
@@ -60,32 +57,23 @@ class DashboardController extends Controller
 
         $current = \Carbon\Carbon::now();
         $budgetSummaries = $this->budgetHealthService->summariesForUser($user, $current);
-        $budgetLabels = $budgetSummaries->map(fn (array $summary) => $summary['category']->name)->values();
-        $budgetAmounts = $budgetSummaries->map(fn (array $summary) => (float) $summary['amount'])->values();
-        $spentAmounts = $budgetSummaries->map(fn (array $summary) => (float) $summary['spent'])->values();
+        $budgetLabels = $budgetSummaries->map(fn(array $summary) => $summary['category']->name)->values();
+        $budgetAmounts = $budgetSummaries->map(fn(array $summary) => (float) $summary['amount'])->values();
+        $spentAmounts = $budgetSummaries->map(fn(array $summary) => (float) $summary['spent'])->values();
 
-        $upcomingRecurringTransactions = RecurringTransaction::query()
-            ->where('user_id', $user->id)
+        $insights = collect([]);
+
+        $upcomingRecurringTransactions = RecurringTransaction::where('user_id', $user->id)
+            ->with('account')
             ->where('is_active', true)
-            ->whereNotNull('next_due_date')
-            ->whereDate('next_due_date', '<=', $current->copy()->addDays(7)->toDateString())
-            ->with(['account', 'category'])
+            ->where('next_due_date', '>=', now()->startOfDay())
+            ->where('next_due_date', '<=', now()->addDays(7)->endOfDay())
+            ->where(function ($query) {
+                $query->whereNull('ends_on')
+                    ->orWhere('ends_on', '>=', now()->startOfDay());
+            })
             ->orderBy('next_due_date')
-            ->take(5)
             ->get();
-
-        $notificationPreview = AppNotification::query()
-            ->where('user_id', $user->id)
-            ->latest()
-            ->take(4)
-            ->get();
-
-        $unreadNotificationCount = AppNotification::query()
-            ->where('user_id', $user->id)
-            ->whereNull('read_at')
-            ->count();
-
-        $insights = $this->insightService->forUser($user, $current);
 
         return view('dashboard', compact(
             'totalBalance',
@@ -101,11 +89,9 @@ class DashboardController extends Controller
             'budgetLabels',
             'budgetAmounts',
             'spentAmounts',
-            'upcomingRecurringTransactions',
-            'notificationPreview',
-            'unreadNotificationCount',
+            'budgetSummaries',
             'insights',
-            'budgetSummaries'
+            'upcomingRecurringTransactions'
         ));
     }
 }

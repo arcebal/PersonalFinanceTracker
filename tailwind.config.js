@@ -14,13 +14,14 @@ export default {
         extend: {
             colors: {
                 grok: {
-                    DEFAULT: '#138AF2',
-                    500: '#138AF2',
-                    600: '#0A63D8'
+                    DEFAULT: '#2D4A6F',
+                    500: '#2D4A6F',
+                    600: '#1F3A5C'
                 },
-                grokTeal: '#17B890',
-                grokAmber: '#F1B561',
-                surface: '#F7F9FF'
+                grokTeal: '#8FA8C4',
+                grokAmber: '#B8A88A',
+                grokNavy: '#1A2942',
+                surface: '#F0F2F5'
             },
             fontFamily: {
                 sans: ['Manrope', ...defaultTheme.fontFamily.sans],

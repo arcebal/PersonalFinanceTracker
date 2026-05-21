@@ -11,14 +11,16 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\Api\SidebarBadgeController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    if (! auth()->check()) {
+    if (! Auth::check()) {
         return view('landing');
     }
 
-    return auth()->user()->hasCompletedOnboarding()
+    return Auth::user()->hasCompletedOnboarding()
         ? redirect()->route('dashboard')
         : redirect()->route('onboarding.start');
 });
@@ -79,4 +81,8 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::delete('/settings/profile/avatar', [SettingsController::class, 'destroyAvatar'])->name('settings.avatar.destroy');
 });
 
-require __DIR__.'/auth.php';
+Route::get('/api/sidebar-badges', SidebarBadgeController::class)
+    ->middleware('auth')
+    ->name('api.sidebar-badges');
+
+require __DIR__ . '/auth.php';
