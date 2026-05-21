@@ -140,19 +140,122 @@
                 @endif
             </div>
         </header>
+
         {{-- HERO --}}
-        <section class="lp-hero">
-            <div class="lp-hero-inner">
+        <style>
+            /* Bold navy-to-slate gradient — matches TrackerYarn brand */
+            .lp-hero-gradient {
+                background: linear-gradient(165deg, #1e3a5f 0%, #243554 35%, #1a2942 70%, #0f172a 100%);
+                position: relative;
+                overflow: hidden;
+                border-bottom: none;
+            }
+
+            /* Soft ambient glow blobs */
+            .lp-hero-gradient::before {
+                content: '';
+                position: absolute;
+                width: 500px;
+                height: 500px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 65%);
+                top: -150px;
+                right: -100px;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .lp-hero-gradient::after {
+                content: '';
+                position: absolute;
+                width: 400px;
+                height: 400px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 60%);
+                bottom: -100px;
+                left: -80px;
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .lp-hero-gradient>* {
+                position: relative;
+                z-index: 1;
+            }
+
+            /* YNAB-style floating animations */
+            @keyframes float {
+
+                0%,
+                100% {
+                    transform: translateY(0px) rotate(0deg);
+                }
+
+                50% {
+                    transform: translateY(-18px) rotate(0.5deg);
+                }
+            }
+
+            @keyframes float-slow {
+
+                0%,
+                100% {
+                    transform: translateY(0px) rotate(0deg);
+                }
+
+                50% {
+                    transform: translateY(-12px) rotate(-0.5deg);
+                }
+            }
+
+            @keyframes float-reverse {
+
+                0%,
+                100% {
+                    transform: translateY(0px);
+                }
+
+                50% {
+                    transform: translateY(14px);
+                }
+            }
+
+            .float {
+                animation: float 6s ease-in-out infinite;
+            }
+
+            .float-slow {
+                animation: float-slow 8s ease-in-out infinite;
+            }
+
+            .float-reverse {
+                animation: float-reverse 7s ease-in-out infinite;
+            }
+
+            .float-delay-1 {
+                animation-delay: 0s;
+            }
+
+            .float-delay-2 {
+                animation-delay: 2s;
+            }
+
+            .float-delay-3 {
+                animation-delay: 4s;
+            }
+        </style>
+        <section class="lp-hero lp-hero-gradient">
+            <div class="lp-hero-inner" style="position: relative; z-index: 1;">
                 <div class="flex flex-col-reverse lg:flex-row items-center gap-0 w-full">
 
                     {{-- LEFT: Text Content --}}
                     <div class="w-full lg:w-1/2 flex flex-col items-start text-left pl-0 lg:pl-4">
 
-                        <h1 class="lp-hero-title">
+                        <h1 class="lp-hero-title" style="color: #ffffff;">
                             Know where your<br>money goes.
                         </h1>
 
-                        <p class="lp-hero-sub">
+                        <p class="lp-hero-sub" style="color: rgba(255,255,255,0.75);">
                             Most people lose track without realizing it. TrackerYarn gives you guided setup,
                             smart categories, monthly budgets, and recurring reminders — so every peso is
                             accounted for, every single day.
@@ -175,12 +278,23 @@
                     {{-- RIGHT: Hero Image --}}
                     <div class="w-full lg:w-1/2 flex items-center justify-end">
                         <img src="{{ asset('hero/hero-section-image.png') }}"
-                            alt="Personal finance management illustration" class="w-full object-contain select-none"
+                            alt="Personal finance management illustration"
+                            class="w-full object-contain select-none float float-delay-1"
                             style="filter: drop-shadow(0 24px 48px rgba(26,41,66,0.15)); max-width: 720px; margin-right: -7rem;"
                             draggable="false">
                     </div>
 
                 </div>
+            </div>
+            {{-- Wave divider --}}
+            <div class="hero-wave"
+                style="position: absolute; bottom: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; z-index: 2; transform: rotate(180deg);">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none"
+                    style="position: relative; display: block; width: calc(100% + 1.3px); height: 100px;">
+                    <path
+                        d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
+                        style="fill: #f8fafc;"></path>
+                </svg>
             </div>
         </section>
 
@@ -447,7 +561,7 @@
                         <div class="lp-modal-field">
                             <label for="login_email" class="lp-modal-label">Email</label>
                             <input id="login_email" type="email" name="email" value="{{ old('email') }}"
-                                class="lp-modal-input" placeholder="you@example.com" autocomplete="username"
+                                class="lp-modal-input" placeholder="Enter your email address" autocomplete="username"
                                 autofocus>
                             @error('email')
                                 <p class="lp-modal-error">{{ $message }}</p>
@@ -462,7 +576,7 @@
                                 @endif
                             </div>
                             <input id="login_password" type="password" name="password" class="lp-modal-input"
-                                placeholder="••••••••" autocomplete="current-password">
+                                placeholder="Enter your password" autocomplete="current-password">
                             @error('password')
                                 <p class="lp-modal-error">{{ $message }}</p>
                             @enderror
@@ -551,7 +665,7 @@
                         <div class="lp-modal-field">
                             <label for="reg_name" class="lp-modal-label">Name</label>
                             <input id="reg_name" type="text" name="name" value="{{ old('name') }}"
-                                class="lp-modal-input" placeholder="Your full name" autocomplete="name">
+                                class="lp-modal-input" placeholder="Enter your full name" autocomplete="name">
                             @error('name')
                                 <p class="lp-modal-error">{{ $message }}</p>
                             @enderror
@@ -559,7 +673,8 @@
                         <div class="lp-modal-field">
                             <label for="reg_email" class="lp-modal-label">Email</label>
                             <input id="reg_email" type="email" name="email" value="{{ old('email') }}"
-                                class="lp-modal-input" placeholder="you@example.com" autocomplete="username">
+                                class="lp-modal-input" placeholder="Enter your email address"
+                                autocomplete="username">
                             @error('email')
                                 <p class="lp-modal-error">{{ $message }}</p>
                             @enderror
@@ -567,7 +682,7 @@
                         <div class="lp-modal-field">
                             <label for="reg_password" class="lp-modal-label">Password</label>
                             <input id="reg_password" type="password" name="password" class="lp-modal-input"
-                                placeholder="Min. 8 characters" autocomplete="new-password">
+                                placeholder="Enter your password" autocomplete="new-password">
                             @error('password')
                                 <p class="lp-modal-error">{{ $message }}</p>
                             @enderror
@@ -575,7 +690,7 @@
                         <div class="lp-modal-field">
                             <label for="reg_password_confirmation" class="lp-modal-label">Confirm Password</label>
                             <input id="reg_password_confirmation" type="password" name="password_confirmation"
-                                class="lp-modal-input" placeholder="Repeat your password"
+                                class="lp-modal-input" placeholder="Confirm your password"
                                 autocomplete="new-password">
                             @error('password_confirmation')
                                 <p class="lp-modal-error">{{ $message }}</p>
